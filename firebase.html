@@ -1,0 +1,46 @@
+<!doctype html>
+<title>codin9cafe</title>
+<script src="node_modules/mithril/mithril.min.js"></script>
+
+<!-- firebase SDK from CDN -->
+<script src="https://www.gstatic.com/firebasejs/3.4.1/firebase.js"></script>
+<script src="https://www.gstatic.com/firebasejs/3.4.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/3.4.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/3.4.0/firebase-database.js"></script>
+
+<script src="mithrilfire.js"></script>
+<script src="firebase.config.js"></script>
+
+<body>
+<script>
+  var codin9cafe = {} || "";
+
+  codin9cafe.vm = (function(){
+    var vm = {};
+    vm.init = function(){
+      firebase.initializeApp(config);
+    };
+
+    return vm; 
+  }())
+
+  codin9cafe.controller = function(){
+    codin9cafe.vm.init();
+    var ref = firebase.database().ref("events/");
+    this.events = m.firebase(ref.orderByChild("num"));
+  }
+
+  codin9cafe.view = function(ctrl){
+    return [
+      m('h1', 'Codin9cafe Events List'),
+      m('ul', 
+          ctrl.events.reverse().map(function(event){
+            return m('li', event.date + ' / ' + event.num + ' / ' + event.loc);
+          })
+        )
+    ];
+  }
+
+  m.module(document.body, codin9cafe);
+</script>
+</body>

@@ -1,0 +1,34 @@
+body{
+  margin: 0;
+}
+.container{
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+}
+header{
+  height: 300px;
+  border-bottom:1px solid gray;
+  padding-left:20px;
+}
+footer{
+  border-top:1px solid gray;
+  padding:20px;
+  text-align: center;
+}
+.content{
+  display:flex;
+}
+.content nav{
+  border-right:1px solid gray;
+}
+.content aside{
+  border-left:1px solid gray;    
+}
+nav, aside{
+  flex-basis: 150px;
+  flex-shrink: 0;
+}
+main{
+  padding:10px;
+}

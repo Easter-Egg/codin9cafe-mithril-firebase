@@ -1,0 +1,73 @@
+<!doctype html>
+<script src="node_modules/mithril/mithril.min.js"></script>
+<body>
+<script>
+  var codin9cafe = {} || '';
+
+  codin9cafe.Presentation = function(data){
+    this.title = m.prop(data.title);
+    this.speaker = m.prop(data.speaker);
+    this.content = m.prop(data.content);
+    this.time = m.prop(0);
+    this.like = m.prop(0);
+    this.liked = m.prop(false);
+  }
+
+  codin9cafe.PresentationList = Array;
+
+  codin9cafe.vm = (function(){
+    var vm = {};
+    vm.init = function() {
+
+      vm.list = new codin9cafe.PresentationList();
+      vm.title = m.prop("");
+      vm.speaker = m.prop("");
+      vm.content = m.prop("");
+      vm.timerOn = m.prop(false);
+
+      vm.add = function(){
+        if(vm.title() && vm.speaker()){
+          vm.list.push(new codin9cafe.Presentation({
+            title: vm.title(),
+            speaker: vm.speaker(),
+            content: vm.content()
+          }));
+
+          vm.title("");
+          vm.speaker("");
+          vm.content("");
+        }
+      };
+    }
+    return vm
+  }())
+
+  codin9cafe.controller = function(){
+    codin9cafe.vm.init();
+  }
+
+  codin9cafe.view = function(){
+    return [
+      m("input", {onchange: m.withAttr("value", codin9cafe.vm.title), value: codin9cafe.vm.title()}),
+      m("input", {onchange: m.withAttr("value", codin9cafe.vm.speaker), value: codin9cafe.vm.speaker()}),
+      m("input", {onchange: m.withAttr("value", codin9cafe.vm.content), vlaue: codin9cafe.vm.content()}),
+      m("button", {onclick: codin9cafe.vm.add}, "Add"),
+      m("div", [
+        codin9cafe.vm.list.map(function(presentation, index){
+          return m("p", [
+            m("span", {style: {marginRight: "10px"}}, presentation.title()),
+            m("span", {style: {marginRight: "10px"}}, presentation.speaker()),
+            m("a", {href: presentation.content(), target:"_blank", style: {marginRight: "10px"}}, "link"),
+            m("span", {style: {marginRight: "10px"}}, presentation.time()),
+            m("span", {style: {marginRight: "10px"}}, presentation.like()),
+            m("button", {onclick: codin9cafe.vm.timerOn(!codin9cafe.vm.timerOn())}, "timer"),
+            m("button", {onclick: presentation.liked = !presentation.liked}, "like")
+          ])
+        })
+      ])
+    ]
+  };
+
+  m.mount(document.body, {controller: codin9cafe.controller, view: codin9cafe.view});
+</script>
+</body>
