@@ -54,7 +54,7 @@
       m("button", {onclick: codin9cafe.vm.add}, "Add"),
       m("div", [
         codin9cafe.vm.list.map(function(presentation, index){
-          return m("p", [
+          return m("p", {style: {color:"red"}}, [
             m("span", {style: {marginRight: "10px"}}, presentation.title()),
             m("span", {style: {marginRight: "10px"}}, presentation.speaker()),
             m("a", {href: presentation.content(), target:"_blank", style: {marginRight: "10px"}}, "link"),
