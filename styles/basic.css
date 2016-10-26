@@ -1,0 +1,20 @@
+#events {
+  display: inline-block;
+}
+
+.event:hover {
+  cursor: pointer;
+  color: blue;
+}
+
+.presentation {
+  color: black;
+}
+
+.opened {
+  display: block;
+}
+
+.closed {
+  display: none;
+}
