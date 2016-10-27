@@ -92,15 +92,12 @@ login.vm = (function() {
       m.request({
         method: "POST",
         url: "http://localhost:3000/login",
-        unwrapSuccess: function(res) {
-          // go to event list with params
-          return res.data;
-        },
-        unwrapError: function(res) {
-          alert("로그인 실패");
-          m.route("/login");
+        data: {
+          json: "{\"id\": \""+ vm.id() +"\", \"pw\": \""+ vm.pwd()+"\"}"
         }
-      })
+      }).then(function(res){
+        alert("Login Success");
+      }, function(err) {alert("Login Failed");});
     };
   };
   return vm;
@@ -111,16 +108,82 @@ login.controller = function() {
 }
 
 login.view = function(){
-  return m('div', [
-    m('input', {onchange: m.withAttr("value", login.vm.id), value: login.vm.id(), placeholder: "ID"}),
-    m('br'),
-    m('input', {type: "password", onchange: m.withAttr("value", login.vm.pwd), value: login.vm.pwd(), placeholder: "PW"}),
-    m('br'),
-    m('button', {onclick: login.vm.login}, "로그인")
-  ]);
+  return [
+    m('h1', "Login"),
+    m('div', [
+      m('input', {onchange: m.withAttr("value", login.vm.id), value: login.vm.id(), placeholder: "ID"}),
+      m('br'),
+      m('input', {type: "password", onchange: m.withAttr("value", login.vm.pwd), value: login.vm.pwd(), placeholder: "PW"}),
+      m('br'),
+      m('button', {onclick: login.vm.login}, "로그인"),
+      m("a[href='/register']", {config: m.route},"to register")
+    ])
+  ]
 }
 
-m.route(document.body, "/", {
+var register = {} || "";
+
+register.Info = function(data){
+  this.id = m.prop(data.id);
+  this.pwd = m.prop(data.pwd);
+  this.email = m.prop(data.email);
+};
+
+register.vm = (function() {
+  var vm = {};
+
+  vm.init = function() {
+    var xhrConfig = function(xhr) {
+      xhr.setRequestHeader("Content-Type", "application/json");
+    };
+    var serialize = function(data){
+      return JSON.stringify(data);
+    };
+    var deserialize = function(data){
+      return JSON.parse(data.toString());
+    };
+    vm.id = m.prop("");
+    vm.pwd = m.prop("");
+    vm.email = m.prop("");
+    vm.register = function(){
+      var data = {id: vm.id(), pw: vm.pwd(), email: vm.email()};
+      // go to server 
+      m.request({
+        method: "POST",
+        url: "http://localhost:3000/register",
+        config: xhrConfig,
+        data: data,
+        serialize: serialize,
+        deserialize: deserialize
+      }).then(function(res){
+        alert("Register Success");
+      }, function(err) {alert("Register Failed");});
+    };
+  };
+  return vm;
+}())
+
+register.controller = function() {
+  register.vm.init();
+}
+
+register.view = function(){
+  return [
+    m('h1', "Register"),
+    m('div', [
+      m('input', {onchange: m.withAttr("value", register.vm.id), value: register.vm.id(), placeholder: "ID"}),
+      m('br'),
+      m('input', {type: "password", onchange: m.withAttr("value", register.vm.pwd), value: register.vm.pwd(), placeholder: "PW"}),
+      m('br'),
+      m('input', {type: "email", onchange: m.withAttr("value", register.vm.email), value: register.vm.email(), placeholder: "e-mail"}),
+      m('br'),
+      m('button', {onclick: register.vm.register}, "회원가입")
+    ])
+  ]
+}
+
+m.route(document.body, "/login", {
   "/": codin9cafe,
-  "/login": login
+  "/login": login,
+  "/register": register
 })
