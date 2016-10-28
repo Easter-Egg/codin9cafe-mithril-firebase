@@ -1,5 +1,13 @@
 var codin9cafe = {} || "";
 
+var serialize = function(data){
+  return JSON.stringify(data);
+};
+
+var deserialize = function(data){
+  return JSON.parse(data.toString());
+};
+
 codin9cafe.vm = (function(){
   var vm = {};
   vm.init = function(){
@@ -11,6 +19,12 @@ codin9cafe.vm = (function(){
 
 codin9cafe.controller = function(){
   codin9cafe.vm.init();
+
+  if (window.sessionStorage) {
+    var currentUser = sessionStorage.getItem('user');
+  }
+
+  if(!currentUser) m.route("/login");
   return {
     events: function(){
       var ref = firebase.database().ref("events/");
@@ -45,6 +59,10 @@ codin9cafe.controller = function(){
         event.opened(!event.opened());
         console.log(event.opened());
       }
+    },
+    logout: function(){
+      sessionStorage.clear();
+      m.route("/login");
     }
   }
 }
@@ -52,6 +70,10 @@ codin9cafe.controller = function(){
 codin9cafe.view = function(ctrl){
   return [
     m('h1', 'Codin9cafe Events List'),
+    m('div', [
+      m('span',  'Hello, ' + sessionStorage.getItem('user') + ' !'),
+      m('button', {onclick:ctrl.logout}, "로그아웃"),
+    ]),
     m('ul', {id: "events"}, 
       ctrl.events().map(function(event){
         return [
@@ -87,17 +109,31 @@ login.vm = (function() {
     vm.id = m.prop("");
     vm.pwd = m.prop("");
     vm.login = function(){
-      console.log(vm.id(), vm.pwd());
+      var data = {id: vm.id(), pw: vm.pwd()};
+      var xhrConfig = function(xhr) {
+        xhr.setRequestHeader("Content-Type", "application/json");
+      };
       // go to server 
       m.request({
         method: "POST",
         url: "http://localhost:3000/login",
-        data: {
-          json: "{\"id\": \""+ vm.id() +"\", \"pw\": \""+ vm.pwd()+"\"}"
-        }
+        config: xhrConfig,
+        data: data,
+        serialize: serialize,
+        deserialize: deserialize
       }).then(function(res){
-        alert("Login Success");
-      }, function(err) {alert("Login Failed");});
+        vm.id = m.prop("");
+        vm.pwd = m.prop("");
+        // store id in session storage and the m.route to list
+        // alert(res.msg + ', ' + res.user);
+        if (window.sessionStorage) {
+            sessionStorage.setItem('user', res.user);
+        }
+        m.route('/');
+      }, function(err) {
+        alert(err.msg);
+        vm.pwd = m.prop("");
+      });
     };
   };
   return vm;
@@ -136,12 +172,7 @@ register.vm = (function() {
     var xhrConfig = function(xhr) {
       xhr.setRequestHeader("Content-Type", "application/json");
     };
-    var serialize = function(data){
-      return JSON.stringify(data);
-    };
-    var deserialize = function(data){
-      return JSON.parse(data.toString());
-    };
+    
     vm.id = m.prop("");
     vm.pwd = m.prop("");
     vm.email = m.prop("");
@@ -156,7 +187,11 @@ register.vm = (function() {
         serialize: serialize,
         deserialize: deserialize
       }).then(function(res){
-        alert("Register Success");
+        vm.id = m.prop("");
+        vm.pwd = m.prop("");
+        vm.email = m.prop("");
+        alert(res.msg);
+        m.route("/login");
       }, function(err) {alert("Register Failed");});
     };
   };
